@@ -1,0 +1,9 @@
+solid ASCII_STL_of_a_sphericon_by_CMG_Lee
+ facet normal 0.70675 -0.70746 0
+  outer loop
+   vertex 1000 0 0
+   vertex 0 -1000 0
+   vertex 0 -999 -52
+  endloop
+ endfacet
+endsolid ASCII_STL_of_a_sphericon_by_CMG_Lee
