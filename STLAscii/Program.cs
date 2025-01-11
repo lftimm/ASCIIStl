@@ -1,8 +1,5 @@
-﻿using ASCIIStl.Core;
-using ASCIIStl.Core.Geometry;
+﻿using ASCIIStl.Core.Geometry;
 using ASCIIStl.Rendering;
-using OpenTK.Windowing.GraphicsLibraryFramework;
-using System.Numerics;
 using Vector = ASCIIStl.Core.Geometry.Vector;
 
 namespace ASCIIStl

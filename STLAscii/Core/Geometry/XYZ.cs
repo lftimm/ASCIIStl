@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace ASCIIStl.Core.Geometry
 {
-    public class XYZ(double x, double y, double z)
+    public class XYZ(float x, float y, float z)
     {
-        public double X { get; set; } = x;
-        public double Y { get; set; } = y;
-        public double Z { get; set; } = z;
+        public float X { get; set; } = x;
+        public float Y { get; set; } = y;
+        public float Z { get; set; } = z;
 
         // Public Methods
         public override string ToString()
@@ -24,7 +24,7 @@ namespace ASCIIStl.Core.Geometry
         }
 
 
-        // Private mehtods
+        // Private methods
 
     }
 }

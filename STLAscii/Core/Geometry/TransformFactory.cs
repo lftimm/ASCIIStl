@@ -105,6 +105,7 @@ namespace ASCIIStl.Core.Geometry
 
             return rotationZ * rotationY * rotationX; // Order of rotations matters
         }
+
         public static Transform FromMatrix4(Matrix4 matrix)
         {
             float[] values = new float[16]

@@ -76,9 +76,9 @@ namespace ASCIIStl.Core.Geometry
 
         public float[] ToArrayF()
         {
-            Vector3F v1 = V1.ToStruct();
-            Vector3F v2 = V2.ToStruct();
-            Vector3F v3 = V3.ToStruct();
+            Vector v1 = V1;
+            Vector v2 = V2;
+            Vector v3 = V3;
 
             return new float[]
             {

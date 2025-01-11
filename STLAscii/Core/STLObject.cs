@@ -37,9 +37,9 @@ namespace ASCIIStl.Core
                         if (vertexLine.StartsWith("vertex"))
                         {
                             var parts = vertexLine.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                            double x = double.Parse(parts[1], CultureInfo.InvariantCulture);
-                            double y = double.Parse(parts[2], CultureInfo.InvariantCulture);
-                            double z = double.Parse(parts[3], CultureInfo.InvariantCulture);
+                            float x = float.Parse(parts[1], CultureInfo.InvariantCulture);
+                            float y = float.Parse(parts[2], CultureInfo.InvariantCulture);
+                            float z = float.Parse(parts[3], CultureInfo.InvariantCulture);
                             vertices.Add(new Vector(x, y, z));
                         }
                     }
