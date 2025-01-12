@@ -14,6 +14,7 @@ namespace ASCIIStl.Core.Geometry
         public Vector V1 { get; private set; }
         public Vector V2 { get; private set; }
         public Vector V3 { get; private set; }
+        public List<Vector> Vertices { get => [V1, V2, V3]; }
         public Vector FaceNormal { get; private set; }
 
         public Face(ICollection<Vector> vertexList)

@@ -11,6 +11,7 @@ namespace ASCIIStl.Core.Geometry
         // Properties
         public float Length { get => GetLength(); }
 
+
         // Constructor
         public Vector(float x, float y, float z) : base(x, y, z) { }
 
@@ -59,11 +60,26 @@ namespace ASCIIStl.Core.Geometry
             return new Vector(v.X / scalar, v.Y / scalar, v.Z / scalar);
         }
 
+        public override bool Equals(object obj)
+        {
+            if (obj is Vector other)
+            {
+                return X == other.X && Y == other.Y && Z == other.Z;
+            }
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(X, Y, Z);
+        }
+
         // Private Methods
         private float GetLength()
         {
             return MathF.Sqrt(X * X + Y * Y + Z * Z);
         }
+
 
     }
 }

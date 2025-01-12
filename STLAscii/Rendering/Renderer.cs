@@ -1,4 +1,5 @@
-﻿using ASCIIStl.Core.Geometry;
+﻿using ASCIIStl.Core;
+using ASCIIStl.Core.Geometry;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
@@ -18,9 +19,11 @@ namespace ASCIIStl.Rendering
         private Shader ShaderProgram { get; set; }
 
         float[] Vertices;
+        uint[] IndexVertices;
 
-        private int VertexArray { get; set; }
-        private int VertexBuffer { get; set; }
+        private VertexArray  VAO { get; set; }
+        private VertexBuffer VBO { get; set; }
+        int ElementBuffer { get; set; }
 
         public static Renderer GetRender(int width, int height, string title, Shader shaderProgram, Face face)
         {
@@ -38,7 +41,23 @@ namespace ASCIIStl.Rendering
             Height = height;
 
             ShaderProgram = shaderProgram;
-            Vertices = face.ToArrayF();
+            //Vertices = face.ToArrayF();
+            STLObject myObject = new("C:\\Users\\lftim\\Documents\\Projects\\STLAscii\\STLAscii\\STLDemos\\square.stl");
+
+            Vertices = [-0.5f,0.5f,0f,
+               0.5f,0.5f,0f,
+               0.5f,-0.5f,0f,
+               -0.5f,-0.5f,0f];
+
+            IndexVertices = [0,1,2,
+                            2,3,0];
+             
+            //Vertices = myObject.Vertices;
+            //IndexVertices = myObject.VertForEBO;
+            //foreach (var item in IndexVertices)
+            //{
+            //    Debug.Write($"{item}");
+            //}
         }
 
         protected override void OnLoad()
@@ -48,23 +67,15 @@ namespace ASCIIStl.Rendering
             {
                 Debug.WriteLine("OnLoad: Initializing VAO and VBO");
 
-                VertexArray = GL.GenVertexArray();
-                VertexBuffer = GL.GenBuffer();
+                VAO = new VertexArray();
+                VBO = new VertexBuffer(Vertices);
+                VAO.LinkToVAO(0,3, VBO);
 
-                GL.BindBuffer(BufferTarget.ArrayBuffer, VertexBuffer);
-
-                // Aqui que entram meus vértices
-                GL.BufferData(BufferTarget.ArrayBuffer, Vertices.Length * sizeof(float), Vertices, BufferUsageHint.StaticDraw);
-
-
-                GL.BindVertexArray(VertexArray);
-                GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
-                GL.EnableVertexAttribArray(0);
-
-                GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-                GL.BindVertexArray(0);
-
-                Debug.WriteLine("OnLoad: Initializing Shader Program");
+                ElementBuffer = GL.GenBuffer();
+                GL.BindBuffer(BufferTarget.ElementArrayBuffer, ElementBuffer);
+                GL.BufferData(BufferTarget.ElementArrayBuffer, IndexVertices.Length*sizeof(uint), IndexVertices, BufferUsageHint.StaticDraw);
+                GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
+                
 
                 ShaderProgram.Start();
             }
@@ -82,11 +93,12 @@ namespace ASCIIStl.Rendering
             try
             {
                 Debug.WriteLine("OnUnload: Deleting VAO and VBO");
-                GL.DeleteVertexArray(VertexArray);
-                GL.DeleteBuffer(VertexBuffer);
+                VAO.Delete();
+                VBO.Delete();
+                GL.DeleteBuffer(ElementBuffer);
                 if (ShaderProgram != null)
                 {
-                    GL.DeleteProgram(ShaderProgram.Handle);
+                    ShaderProgram.Delete();
                 }
             }
             catch (Exception ex)
@@ -106,28 +118,32 @@ namespace ASCIIStl.Rendering
 
                 if (ShaderProgram != null)
                 {
-                    GL.UseProgram(ShaderProgram.Handle);
-                    GL.BindVertexArray(VertexArray);
+                    ShaderProgram.Bind();
+                    VAO.Bind();
+                    VBO.Bind();
+                    GL.BindBuffer(BufferTarget.ElementArrayBuffer, ElementBuffer);
+                    
+                        
+                    //Transform model = Transform.Identity;
+                    //Transform view = Transform.Identity;
 
-                    Transform model = Transform.Identity;
-                    Transform view = Transform.Identity;
+                    //Transform translation = Transform.CreateTranslation(0f, 0f, -3f);
+                    //double rotate = 45;
+                    //model = Transform.CreateRotationAtY((float)rotate);
+                    //model = Transform.CreateRotationAtX((float)rotate);
 
-                    Transform translation = Transform.CreateTranslation(0f, 0f, -3f);
+                    //model *= translation;
+                    //rotate += 1e-3;
+                    //Transform projection = Transform.FromMatrix4(Matrix4.CreatePerspectiveFieldOfView((float)(45 * Math.PI / 180), Width / Height, 0.1f, 100.0f));
 
-                    model = Transform.CreateRotationAtY(45);
-                    model *= translation;
-
-                    Transform projection = Transform.FromMatrix4(Matrix4.CreatePerspectiveFieldOfView((float)(20 * Math.PI / 180), Width / Height, 0.1f, 100.0f));
-
-
-                    int transformLocation = GL.GetUniformLocation(ShaderProgram.Handle, "transform");
+                    int transformLocation = ShaderProgram.GetUniform("transform");
                     
 
-                    float[] transform = (model*view*projection).Values;
+                    float[] transform = (Transform.Identity).Values;
                     GL.UniformMatrix4(transformLocation, 1, true, transform);
 
-
-                    GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
+                    GL.DrawElements(PrimitiveType.Triangles, IndexVertices.Length, DrawElementsType.UnsignedInt, 0);
+                    //GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
                 }
 
                 Context.SwapBuffers();

@@ -9,7 +9,7 @@ namespace ASCIIStl.Rendering
     {
         public string VertexProgram { get; private set; }
         public string FragmentProgram { get; private set; }
-        public int Handle { get; private set; }
+        private int Handle { get; set; }
 
         public Shader(string vertexPath, string fragmentPath)
         {
@@ -67,6 +67,21 @@ namespace ASCIIStl.Rendering
                 string infoLog = GL.GetProgramInfoLog(program);
                 Debug.WriteLine($"ERROR::PROGRAM_LINKING_ERROR\n{infoLog}\n -- --------------------------------------------------- -- ");
             }
+        }
+
+        public void Bind()
+        {
+            GL.UseProgram(Handle);
+        }
+
+        public void Delete()
+        {
+            GL.DeleteProgram(Handle);
+        }
+
+        public int GetUniform(string variable)
+        {
+            return GL.GetUniformLocation(Handle, variable);
         }
     }
 }

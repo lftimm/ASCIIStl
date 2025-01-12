@@ -1,23 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using ASCIIStl.Core.Geometry;
+using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ASCIIStl.Core.Geometry;
 
 namespace ASCIIStl.Core
 {
     public class STLObject
     {
-        public List<Face> Faces { get; set; }
-        private STLFile FileSTL { get; set; }
-        private string FileAsString { get => FileSTL.ThisFile; }
+        private string FileAsString { get; set; }
+        private List<Face> Faces { get; set; }
+        public List<Vector> VertsAsVectors { get; private set; }
+        public float[] Vertices { get; private set; }
+        public uint[] VertForEBO { get; private set; }
+
         public STLObject(string path)
         {
-            FileSTL = new STLFile(path);
+            FileAsString = File.ReadAllText(path);
             Faces = ParseFile();
+            VertsAsVectors = Faces.SelectMany(x => x.Vertices).ToList();
+            Vertices = Faces.SelectMany(x => x.ToArrayF()).ToArray();
+            VertForEBO = OrderVertices();
         }
+
+        private uint[] OrderVertices()
+        {
+
+  
+            return order.ToArray();
+        }
+
+
 
         private List<Face> ParseFile()
         {
@@ -44,12 +55,27 @@ namespace ASCIIStl.Core
                         }
                     }
 
-                    i += 4; 
+                    i += 4;
                     faces.Add(new Face(vertices));
                 }
             }
 
             return faces;
+        }
+        private void PrintOrderArray(uint[] order)
+        {
+            for (int i = 0; i < order.Length; i++)
+            {
+                Debug.Write(order[i] + " ");
+                if ((i + 1) % 3 == 0)
+                {
+                    Debug.WriteLine("");
+                }
+            }
+            if (order.Length % 3 != 0)
+            {
+                Debug.WriteLine("");
+            }
         }
     }
 }
