@@ -9,8 +9,12 @@ namespace ASCIIStl.Core.Geometry
     public class Vector : XYZ
     {
         // Properties
-        public float Length { get => GetLength(); }
+        public static Vector BaseX = new Vector(1, 0, 0);
+        public static Vector BaseY = new Vector(0, 1, 0);
+        public static Vector BaseZ = new Vector(0, 0, 1);
+        public static Vector Zero = new Vector(0, 0, 0);
 
+        public float Length { get => GetLength(); }
 
         // Constructor
         public Vector(float x, float y, float z) : base(x, y, z) { }

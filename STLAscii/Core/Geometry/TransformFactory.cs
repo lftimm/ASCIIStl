@@ -119,6 +119,17 @@ namespace ASCIIStl.Core.Geometry
             return new Transform(values);
         }
 
+        public static Transform CreateCameraTransform(Vector x, Vector y, Vector z, Vector p)
+        {
+            float[] transform =
+            {
+                x.X, y.X, z.X, -p.X,
+                x.Y, y.Y, z.Y, -p.Y,
+                x.Z, y.Z, z.Z, -p.Y,
+                0,   0,   0,    1            };
+            return new Transform(transform);
+        }
+
         // Operators
         public static Transform operator *(Transform a, Transform b)
         {

@@ -4,19 +4,21 @@ using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 using System;
 using System.Diagnostics;
-using System.Numerics;
 
 namespace ASCIIStl.Rendering
 {
     public sealed class Renderer : GameWindow
     {
-        private static Renderer _instance;
+        private static Renderer? _instance;
 
         private int Width { get; set; }
         private int Height { get; set; }
+        private string BaseTitle { get; set; }
         private Shader ShaderProgram { get; set; }
+        private Camera camera { get; set; }
 
         float[] Vertices;
         uint[] IndexVertices;
@@ -26,6 +28,7 @@ namespace ASCIIStl.Rendering
         private ElementBuffer? EBO { get; set; }
 
         double rotate = 45;
+        private double frameTime;
 
         public static Renderer GetRender(int width, int height, string title, Shader shaderProgram, Face face)
         {
@@ -38,16 +41,16 @@ namespace ASCIIStl.Rendering
 
         private Renderer(int width, int height, string title, Shader shaderProgram, Face face)
             : base(GameWindowSettings.Default, new NativeWindowSettings() { Size = new Vector2i(width, height), Title = title })
-        {
-            Width = width;
+        {            
             Height = height;
-
+            Width = width;
             ShaderProgram = shaderProgram;
+            BaseTitle = title;
             //Vertices = face.ToArrayF();
             STLObject myObject = new("C:\\Users\\lftim\\Documents\\Projects\\STLAscii\\STLAscii\\STLDemos\\cubeTest.stl");
 
             //Vertices = [-0.5f, -0.5f, 0,
-            //            -0.5f,  0.5f, 0,
+            //       
             //             0.5f, -0.5f, 0,
             //             0.5f,  0.5f, 0];
 
@@ -83,6 +86,7 @@ namespace ASCIIStl.Rendering
                 Close();
             }
 
+            camera = new Camera(Width, Height, Vector.Zero);
             GL.Enable(EnableCap.DepthTest);
         }
 
@@ -119,20 +123,21 @@ namespace ASCIIStl.Rendering
                     ShaderProgram.Bind();
                     VAO.Bind();
                     VBO.Bind();
-                    EBO.Bind();                    
-                        
+                    EBO.Bind();
+
                     Transform model = Transform.Identity;
-                    Transform view = Transform.Identity;
+                    Transform view = camera.GetViewTransform();
+                    Transform projection = camera.GetProjectionTransform();
+
 
                     Transform translation = Transform.CreateTranslation(0f, 0f, -3f);
 
                     model = Transform.CreateRotationAtY((float)rotate);
                     model *= translation;
                     rotate += 1e-3;
-                    Transform projection = Transform.FromMatrix4(Matrix4.CreatePerspectiveFieldOfView((float)(60 * Math.PI / 180), Width / Height, 0.1f, 100.0f));
 
                     int transformLocation = ShaderProgram.GetUniform("transform");
-                    
+
 
                     float[] transform = (model * view * projection).Values;
                     GL.UniformMatrix4(transformLocation, 1, true, transform);
@@ -140,8 +145,7 @@ namespace ASCIIStl.Rendering
                     GL.DrawElements(PrimitiveType.Triangles, IndexVertices.Length, DrawElementsType.UnsignedInt, 0);
                     //GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
                 }
-
-                Context.SwapBuffers();
+                UpdateTitleWithFPS(args);
             }
             catch (Exception ex)
             {
@@ -149,6 +153,25 @@ namespace ASCIIStl.Rendering
                 Debug.WriteLine(ex.StackTrace);
                 Close();
             }
+        }
+
+        private void UpdateTitleWithFPS(FrameEventArgs args)
+        {
+            frameTime += args.Time;
+            if (frameTime >= 0.25)
+            {
+                Title = $"{BaseTitle} {0.25 / args.Time:F2}";
+                frameTime = 0.0;
+            }
+            Context.SwapBuffers();
+        }
+
+        protected override void OnUpdateFrame(FrameEventArgs args)
+        {
+            KeyboardState input = KeyboardState;
+            MouseState mouse = MouseState;
+            base.OnUpdateFrame(args);
+            camera.UpdateVectors(input, mouse, args);
         }
 
         protected override void OnResize(ResizeEventArgs e)
