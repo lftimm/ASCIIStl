@@ -31,9 +31,28 @@ namespace ASCIIStl.Core.Geometry
             return new Vector(x, y, z);
         }
 
+        public float AngleBetween(Vector v2)
+        {
+            return (float)Math.Acos(this.DotProduct(v2)/(Length*v2.Length));
+        }
+
+        public int[] ToIntArray()
+        {
+            int[] asArray = [(int)X, (int)Y, (int)Z];
+            return asArray;
+        }
+
+        public float[] ToFloatArray()
+        {
+            float[] asArray = [X, Y,Z];
+            return asArray;
+        }
+
         public Vector Normalize()
         {
-            return new Vector(X, Y, Z) / Length;
+            if (!(this.Length == 0))
+                return new Vector(X, Y, Z) / Length;
+            else return this;
         }
 
         public static Vector operator +(Vector v1, Vector v2)

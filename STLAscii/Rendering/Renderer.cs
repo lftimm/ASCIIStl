@@ -24,6 +24,7 @@ namespace ASCIIStl.Rendering
         private VertexArray  VAO { get; set; }
         private VertexBuffer VBO { get; set; }
         int ElementBuffer { get; set; }
+        double rotate = 45;
 
         public static Renderer GetRender(int width, int height, string title, Shader shaderProgram, Face face)
         {
@@ -42,18 +43,18 @@ namespace ASCIIStl.Rendering
 
             ShaderProgram = shaderProgram;
             //Vertices = face.ToArrayF();
-            STLObject myObject = new("C:\\Users\\lftim\\Documents\\Projects\\STLAscii\\STLAscii\\STLDemos\\square.stl");
+            STLObject myObject = new("C:\\Users\\lftim\\Documents\\Projects\\STLAscii\\STLAscii\\STLDemos\\cubeTest.stl");
 
-            Vertices = [-0.5f,0.5f,0f,
-               0.5f,0.5f,0f,
-               0.5f,-0.5f,0f,
-               -0.5f,-0.5f,0f];
+            //Vertices = [-0.5f, -0.5f, 0,
+            //            -0.5f,  0.5f, 0,
+            //             0.5f, -0.5f, 0,
+            //             0.5f,  0.5f, 0];
 
-            IndexVertices = [0,1,2,
-                            2,3,0];
-             
-            //Vertices = myObject.Vertices;
-            //IndexVertices = myObject.VertForEBO;
+            //IndexVertices = [0,2,1,
+            //                 0,2,3];
+
+            Vertices = myObject.UniqueVertices.SelectMany(x => x.ToFloatArray()).ToArray();
+            IndexVertices = myObject.ElementIndexes;
             //foreach (var item in IndexVertices)
             //{
             //    Debug.Write($"{item}");
@@ -85,6 +86,8 @@ namespace ASCIIStl.Rendering
                 Debug.WriteLine(ex.StackTrace);
                 Close();
             }
+
+            GL.Enable(EnableCap.DepthTest);
         }
 
         protected override void OnUnload()
@@ -114,7 +117,7 @@ namespace ASCIIStl.Rendering
             try
             {
                 GL.ClearColor(0f, 0f, 0f, 1f);
-                GL.Clear(ClearBufferMask.ColorBufferBit);
+                GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
                 if (ShaderProgram != null)
                 {
@@ -124,22 +127,20 @@ namespace ASCIIStl.Rendering
                     GL.BindBuffer(BufferTarget.ElementArrayBuffer, ElementBuffer);
                     
                         
-                    //Transform model = Transform.Identity;
-                    //Transform view = Transform.Identity;
+                    Transform model = Transform.Identity;
+                    Transform view = Transform.Identity;
 
-                    //Transform translation = Transform.CreateTranslation(0f, 0f, -3f);
-                    //double rotate = 45;
-                    //model = Transform.CreateRotationAtY((float)rotate);
-                    //model = Transform.CreateRotationAtX((float)rotate);
+                    Transform translation = Transform.CreateTranslation(0f, 0f, -3f);
 
-                    //model *= translation;
-                    //rotate += 1e-3;
-                    //Transform projection = Transform.FromMatrix4(Matrix4.CreatePerspectiveFieldOfView((float)(45 * Math.PI / 180), Width / Height, 0.1f, 100.0f));
+                    model = Transform.CreateRotationAtY((float)rotate);
+                    model *= translation;
+                    rotate += 1e-3;
+                    Transform projection = Transform.FromMatrix4(Matrix4.CreatePerspectiveFieldOfView((float)(60 * Math.PI / 180), Width / Height, 0.1f, 100.0f));
 
                     int transformLocation = ShaderProgram.GetUniform("transform");
                     
 
-                    float[] transform = (Transform.Identity).Values;
+                    float[] transform = (model * view * projection).Values;
                     GL.UniformMatrix4(transformLocation, 1, true, transform);
 
                     GL.DrawElements(PrimitiveType.Triangles, IndexVertices.Length, DrawElementsType.UnsignedInt, 0);
