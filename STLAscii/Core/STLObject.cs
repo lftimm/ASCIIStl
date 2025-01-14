@@ -9,7 +9,7 @@ namespace ASCIIStl.Core
     public class STLObject
     {
         private string FileAsString { get; set; }
-        private List<Face> Faces { get; set; }
+        public List<Face> Faces { get; private set; }
         public List<Vector> Vertices { get; private set; }
         public  List<Vector>  UniqueVertices { get; private set; }
         public uint[] ElementIndexes { get; private set; }
