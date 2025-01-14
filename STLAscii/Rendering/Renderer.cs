@@ -21,9 +21,10 @@ namespace ASCIIStl.Rendering
         float[] Vertices;
         uint[] IndexVertices;
 
-        private VertexArray  VAO { get; set; }
-        private VertexBuffer VBO { get; set; }
-        int ElementBuffer { get; set; }
+        private VertexArray?  VAO { get; set; }
+        private VertexBuffer? VBO { get; set; }
+        private ElementBuffer? EBO { get; set; }
+
         double rotate = 45;
 
         public static Renderer GetRender(int width, int height, string title, Shader shaderProgram, Face face)
@@ -70,13 +71,8 @@ namespace ASCIIStl.Rendering
 
                 VAO = new VertexArray();
                 VBO = new VertexBuffer(Vertices);
+                EBO = new ElementBuffer(IndexVertices);
                 VAO.LinkToVAO(0,3, VBO);
-
-                ElementBuffer = GL.GenBuffer();
-                GL.BindBuffer(BufferTarget.ElementArrayBuffer, ElementBuffer);
-                GL.BufferData(BufferTarget.ElementArrayBuffer, IndexVertices.Length*sizeof(uint), IndexVertices, BufferUsageHint.StaticDraw);
-                GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
-                
 
                 ShaderProgram.Start();
             }
@@ -98,7 +94,6 @@ namespace ASCIIStl.Rendering
                 Debug.WriteLine("OnUnload: Deleting VAO and VBO");
                 VAO.Delete();
                 VBO.Delete();
-                GL.DeleteBuffer(ElementBuffer);
                 if (ShaderProgram != null)
                 {
                     ShaderProgram.Delete();
@@ -124,8 +119,7 @@ namespace ASCIIStl.Rendering
                     ShaderProgram.Bind();
                     VAO.Bind();
                     VBO.Bind();
-                    GL.BindBuffer(BufferTarget.ElementArrayBuffer, ElementBuffer);
-                    
+                    EBO.Bind();                    
                         
                     Transform model = Transform.Identity;
                     Transform view = Transform.Identity;
