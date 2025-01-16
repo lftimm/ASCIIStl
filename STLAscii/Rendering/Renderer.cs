@@ -47,7 +47,7 @@ namespace ASCIIStl.Rendering
             ShaderProgram = shaderProgram;
             BaseTitle = title;
             //Vertices = face.ToArrayF();
-            STLObject myObject = new("C:\\Users\\lftim\\Documents\\Projects\\STLAscii\\STLAscii\\STLDemos\\cubeTest.stl");
+            STLObject myObject = new("C:\\Users\\lftim\\Documents\\Projects\\STLAscii\\STLAscii\\STLDemos\\sphericon.stl");
 
             //Vertices = [-0.5f, -0.5f, 0,
             //       
@@ -115,8 +115,9 @@ namespace ASCIIStl.Rendering
             base.OnRenderFrame(args);
             try
             {
-                GL.ClearColor(0f, 0f, 0f, 1f);
+                GL.ClearColor(1, 1, 1, 0);
                 GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+
 
                 if (ShaderProgram != null)
                 {
@@ -171,7 +172,7 @@ namespace ASCIIStl.Rendering
             KeyboardState input = KeyboardState;
             MouseState mouse = MouseState;
             base.OnUpdateFrame(args);
-            camera.UpdateVectors(input, mouse, args);
+            camera.Update(input, mouse, args);
         }
 
         protected override void OnResize(ResizeEventArgs e)

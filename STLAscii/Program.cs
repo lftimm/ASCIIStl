@@ -10,8 +10,8 @@ namespace ASCIIStl
 {
     public class Program
     {
-        private const int HEIGHT = 800;
-        private const int WIDTH = 800;
+        private const int HEIGHT = 1280;
+        private const int WIDTH = 720;
         private const string TITLE = "Example Program";
         private const string VERTEX_PATH = "C:\\Users\\lftim\\Documents\\Projects\\STLAscii\\STLAscii\\Rendering\\Shaders\\shader.vert";
         private const string FRAGMENT_PATH = "C:\\Users\\lftim\\Documents\\Projects\\STLAscii\\STLAscii\\Rendering\\Shaders\\shader.frag";

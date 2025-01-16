@@ -81,7 +81,7 @@ namespace ASCIIStl.Rendering
 
         }
 
-        private void UpdateVectors()
+        public void UpdateVectors()
         {
             float yawRad = Yaw * float.Pi / 180;
             float pitchRad = Pitch * float.Pi / 180;
