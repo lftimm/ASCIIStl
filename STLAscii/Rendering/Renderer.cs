@@ -1,5 +1,6 @@
 ﻿using ASCIIStl.Core;
 using ASCIIStl.Core.Geometry;
+using ImGuiNET;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
@@ -7,12 +8,14 @@ using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using System;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace ASCIIStl.Rendering
 {
     public sealed class Renderer : GameWindow
     {
         private static Renderer? _instance;
+        private ImGuiController _controller;
 
         private int Width { get; set; }
         private int Height { get; set; }
@@ -30,39 +33,25 @@ namespace ASCIIStl.Rendering
         double rotate = 45;
         private double frameTime;
 
-        public static Renderer GetRender(int width, int height, string title, Shader shaderProgram, Face face)
+        public static Renderer GetRender(int width, int height, string title, Shader shaderProgram, STLObject myObject)
         {
             if (_instance == null)
             {
-                _instance = new Renderer(width, height, title, shaderProgram, face);
+                _instance = new Renderer(width, height, title, shaderProgram, myObject);
             }
             return _instance;
         }
 
-        private Renderer(int width, int height, string title, Shader shaderProgram, Face face)
+        private Renderer(int width, int height, string title, Shader shaderProgram, STLObject myObject)
             : base(GameWindowSettings.Default, new NativeWindowSettings() { Size = new Vector2i(width, height), Title = title })
         {            
             Height = height;
             Width = width;
             ShaderProgram = shaderProgram;
             BaseTitle = title;
-            //Vertices = face.ToArrayF();
-            STLObject myObject = new("C:\\Users\\lftim\\Documents\\Projects\\STLAscii\\STLAscii\\STLDemos\\sphericon.stl");
-
-            //Vertices = [-0.5f, -0.5f, 0,
-            //       
-            //             0.5f, -0.5f, 0,
-            //             0.5f,  0.5f, 0];
-
-            //IndexVertices = [0,2,1,
-            //                 0,2,3];
 
             Vertices = myObject.UniqueVertices.SelectMany(x => x.ToFloatArray()).ToArray();
             IndexVertices = myObject.ElementIndexes;
-            //foreach (var item in IndexVertices)
-            //{
-            //    Debug.Write($"{item}");
-            //}
         }
 
         protected override void OnLoad()
@@ -77,6 +66,7 @@ namespace ASCIIStl.Rendering
                 EBO = new ElementBuffer(IndexVertices);
                 VAO.LinkToVAO(0,3, VBO);
 
+                _controller = new ImGuiController(50, 50);
                 ShaderProgram.Start();
             }
             catch (Exception ex)
@@ -88,6 +78,7 @@ namespace ASCIIStl.Rendering
 
             camera = new Camera(Width, Height, Vector.Zero);
             GL.Enable(EnableCap.DepthTest);
+            GL.Enable(EnableCap.ScissorTest);
         }
 
         protected override void OnUnload()
@@ -115,9 +106,10 @@ namespace ASCIIStl.Rendering
             base.OnRenderFrame(args);
             try
             {
+                GL.Scissor(Width / 4, 0, Width, Height);
+                _controller.Update(this, (float)args.Time);
                 GL.ClearColor(1, 1, 1, 0);
-                GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-
+                GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
 
                 if (ShaderProgram != null)
                 {
@@ -125,6 +117,14 @@ namespace ASCIIStl.Rendering
                     VAO.Bind();
                     VBO.Bind();
                     EBO.Bind();
+
+                    ImGui.SetNextWindowPos(new System.Numerics.Vector2(0, 0));
+                    ImGui.SetNextWindowSize(new System.Numerics.Vector2(Width / 4, Height));
+                    ImGui.Begin("Configurações", ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoCollapse);
+                    ImGui.SetWindowFontScale(1.5f);
+                    ImGui.End();
+                    _controller.Render();
+                    ImGuiController.CheckGLError("End of frame");
 
                     Transform model = Transform.Identity;
                     Transform view = camera.GetViewTransform();
@@ -142,7 +142,6 @@ namespace ASCIIStl.Rendering
 
                     float[] transform = (model * view * projection).Values;
                     GL.UniformMatrix4(transformLocation, 1, true, transform);
-
                     GL.DrawElements(PrimitiveType.Triangles, IndexVertices.Length, DrawElementsType.UnsignedInt, 0);
                     //GL.DrawArrays(PrimitiveType.Triangles, 0, 3);
                 }
@@ -183,6 +182,7 @@ namespace ASCIIStl.Rendering
                 GL.Viewport(0, 0, e.Width, e.Height);
                 Width = e.Width;
                 Height = e.Height;
+                _controller.WindowResized(e.Width, e.Height);
             }
             catch (Exception ex)
             {
